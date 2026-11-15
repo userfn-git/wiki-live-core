@@ -23,3 +23,6 @@
 ## 4. اختصاراتي السريعة (Quick Commands)
 - فحص النظام: `python tests/verify_all.py`
 - لوحة التحكم: `start chrome D:\projects\wiki-live-core\docs\dashboard.html`
+
+---
+> **[MUTUAL-LOCK]:** Synchronized with [Gemini.md](./Gemini.md) on branch main.
