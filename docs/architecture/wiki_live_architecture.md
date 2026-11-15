@@ -1,2 +1,1 @@
-﻿# WikiLife Architecture Reference
-4 Paths & 12 Branches Trunk.
+﻿# WikiLife Core Architecture (4 Paths & 12 Branches)

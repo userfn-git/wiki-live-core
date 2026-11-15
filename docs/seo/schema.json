@@ -1,0 +1,9 @@
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "WikiLife Core",
+  "author": {
+    "@type": "Person",
+    "name": "Yusra"
+  }
+}

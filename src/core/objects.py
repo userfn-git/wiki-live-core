@@ -1,12 +1,9 @@
 ﻿import hashlib, json, time
 class WikiObject:
-    def digest(self, data: str) -> str: return hashlib.sha256(data.encode('utf-8')).hexdigest()
+    def digest(self, d: str) -> str: return hashlib.sha256(d.encode("utf-8")).hexdigest()
 class Blob(WikiObject):
-    def __init__(self, content: str):
-        self.type = 'blob'; self.content = content; self.sha = self.digest(f'blob:{len(content)}:{content}')
+    def __init__(self, c: str): self.type="blob"; self.content=c; self.sha=self.digest(f"blob:{len(c)}:{c}")
 class Tree(WikiObject):
-    def __init__(self, entries: dict):
-        self.type = 'tree'; self.entries = entries; raw = json.dumps(entries, sort_keys=True); self.sha = self.digest(f'tree:{raw}')
+    def __init__(self, e: dict): self.type="tree"; self.entries=e; self.sha=self.digest("tree:"+json.dumps(e,sort_keys=True))
 class Commit(WikiObject):
-    def __init__(self, tree_sha: str, message: str, parent: str = None):
-        self.type = 'commit'; self.tree_sha = tree_sha; self.message = message; self.parent = parent; self.timestamp = int(time.time()); self.sha = self.digest(f'commit:{tree_sha}:{parent}:{self.timestamp}:{message}')
+    def __init__(self, t: str, m: str, p: str=None): self.type="commit"; self.tree_sha=t; self.message=m; self.parent=p; self.timestamp=int(time.time()); self.sha=self.digest(f"commit:{t}:{p}:{self.timestamp}:{m}")

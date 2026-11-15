@@ -1,0 +1,22 @@
+{
+  "system": "FN-WIKILIFE-CORE",
+  "persona": "Yusra",
+  "paths": 4,
+  "active_branches": 12,
+  "branches": [
+    "PATH01-BR01",
+    "PATH01-BR02",
+    "PATH01-BR03",
+    "PATH02-BR04",
+    "PATH02-BR05",
+    "PATH02-BR06",
+    "PATH03-BR07",
+    "PATH03-BR08",
+    "PATH03-BR09",
+    "PATH04-BR10",
+    "PATH04-BR11",
+    "PATH04-BR12"
+  ],
+  "status": "ALL_ACTIVE",
+  "timestamp": 1794756957
+}

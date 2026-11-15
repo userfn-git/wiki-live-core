@@ -1,0 +1,12 @@
+{
+  "firestore_commits": {
+    "SNAP-0001": {
+      "id": "SNAP-0001",
+      "commit": "3e7326cc1435118526b0d85ebd3df5d9528bcce8b0062993799568a4ce9421ed",
+      "tree": "fafc3e7aba0991927cc1ac47b0d0851b8029fabf4d9c3e00f3513a2c5b360d0e",
+      "blob_md": "31b336bf065f2c35de80f3b0403ca7de4d7c0bc630721c70d07c15345a7d8eaa",
+      "parent": "b7ca75099bb4dfa93ee5d4e8a5e6368fd2f5b60712fef8f39a42277658171c94",
+      "timestamp": 1794756957
+    }
+  }
+}
