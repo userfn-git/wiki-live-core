@@ -1,5 +1,7 @@
 ﻿# FN | WikiLife Core - المرجع الشخصي والجذع المعرفي (Yusra Trunk)
 
+[![WikiLife Core CI](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml)
+
 > **المالك والمطور الرئيسي:** `userfn-git` (FN) | **الفرع المركزي المعتمد:** `main` | **بيئة العمل:** `FN-WORKSTATION (Win11 Pro / Python 3.12 / C++20 / GCP)`
 
 ---

@@ -1,5 +1,7 @@
 ﻿# Gemini.md - Multi-System Workspace & Mutual Lock Specification
 
+[![WikiLife Core CI](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml)
+
 > **[MUTUAL-LOCK: Gemini.md <-> README.md | TRUNK: main | OWNER: userfn-git]**
 
 ## 1. Mutual Locking Governance
