@@ -1,5 +1,7 @@
 ﻿name: WikiLife Core CI
-on: [push]
+on:
+  push:
+    branches: [ main ]
 jobs:
   verify:
     runs-on: ubuntu-latest
