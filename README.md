@@ -1,12 +1,19 @@
-﻿# WikiLife Core (wiki-live-core)
+﻿# منظومة ويكي لايف (WikiLife Core) - الجذع المعرفي ليُسرى
 
-Central architecture and decision-tree engine for the WikiLife ecosystem.
+> **بيئة التشغيل المركزية الخاصة بـ FN (`userfn-git`)** | الجذع المعتمد: `main` | المسار المحلي: `D:\projects\wiki-live-core`
 
-## Workspace Layout
-- .github/workflows/: Automated CI/CD pipelines.
-- docs/: System documentation, architecture references, and blueprints.
-- src/: Core implementation and toolchains.
+## 1. الرؤية المعمارية وصوت يسرى
+تعمل هذه المنظومة كشجرة قرارات ديناميكية تربط النواة التفاعلية بالتوثيق السحابي (Firestore & Google Drive) ومستودع GitHub وصولاً إلى الفهرسة القياسية، تحت الإشراف الإدراكي واللغوي لـ **يسرى**.
 
-## Environment
-- Station: FN-PRO (Windows 11)
-- Core Stack: C++20, Python, MSYS2, CMake, Ninja
+## 2. هيكل المسارات الأربعة والفروع الـ 12
+| المسار | الفروع المعتمدة | النطاق التشغيلي |
+|---|---|---|
+| **PATH-01: البنية والتحكم** | `BR01` - `BR02` - `BR03` | اعتماد فرع `main`، محرك `Blob/Tree/Commit`، والتحصين الأمني `ED25519 SSH` |
+| **PATH-02: إدارة المعرفة** | `BR04` - `BR05` - `BR06` | سجلات `ADR-0001..0012`، أرشفة `Tree Snapshots`، وصياغة يسرى المعيارية |
+| **PATH-03: التطوير والبرمجة** | `BR07` - `BR08` - `BR09` | فروع `Git-flow`، محولات `Cloud Run & Firestore`، وأنابيب `GitHub Actions` |
+| **PATH-04: النشر والإحاطة** | `BR10` - `BR11` - `BR12` | بيانات `JSON-LD`، معايير الحيادية الموسوعية `NPOV`، وإشراف مخرجات `FN` |
+
+## 3. التشغيل السريع (Warp Terminal Flow)
+- لوحة التحكم المرئية: `docs/dashboard.html`
+- سجل القرارات المعمارية: `docs/adr/ADR-0001.md` إلى `ADR-0012.md`
+- الفحص الشامل: `python tests/verify_all.py`
