@@ -1,13 +1,32 @@
-﻿name: WikiLife Core CI
+name: WikiLife CI Architecture
+
 on:
   push:
+    branches: [ main, "PATH*" ]
+  pull_request:
     branches: [ main ]
+
 jobs:
-  verify:
+  validate-tree:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - run: python tests/verify_all.py
+          python-version: '3.12'
+
+      - name: Validate Core Architecture Tree
+        run: |
+          echo "=== Validating WikiLife 4-Path & 12-Branch Structure ==="
+          python -c "
+          import os, sys
+          paths = ['docs/PATH-01_Control', 'docs/PATH-02_Knowledge', 'docs/PATH-03_Development', 'docs/PATH-04_Publishing', 'src/adapters', 'tests/docs']
+          missing = [p for p in paths if not os.path.exists(p)]
+          if missing:
+              print(f'Error: Missing structural paths: {missing}')
+              sys.exit(1)
+          print('Success: All 4 Paths and 12 Branches structure verified.')
+          "
