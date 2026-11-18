@@ -29,3 +29,10 @@ venv/
 # Environment Variables
 .env
 *.log
+
+# Secure Credentials Vault
+.secrets/
+
+
+# WikiLife Forensic Isolation & Quarantine
+.isolation/
