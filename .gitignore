@@ -36,3 +36,6 @@ venv/
 
 # WikiLife Forensic Isolation & Quarantine
 .isolation/
+# Local workstation captures and utility scripts
+obs-studio/
+Force-FixTAInputACL.ps1
