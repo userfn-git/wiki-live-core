@@ -1,4 +1,4 @@
-﻿# Windows System
+# Windows System
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
@@ -44,3 +44,7 @@ Force-FixTAInputACL.ps1
 *.gguf
 *.bin
 *.safetensors
+
+# Exclude large binary Rocket League replay files while keeping Yusra markdown analytics tracked
+data/replays_vault/*.replay
+!docs/match_analytics/*.md
