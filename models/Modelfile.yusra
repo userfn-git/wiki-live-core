@@ -1,7 +1,11 @@
 FROM qwen3:8b
 
-PARAMETER num_ctx 8192
-PARAMETER temperature 0.3
+# Resource caps to coexist with Rocket League (240Hz) on GTX 1660 Ti (6GB VRAM) + 32GB System RAM
+PARAMETER num_ctx 4096
+PARAMETER num_gpu 10
+PARAMETER num_thread 6
+PARAMETER num_predict 400
+PARAMETER temperature 0.25
 PARAMETER top_p 0.9
 
 SYSTEM """
@@ -12,5 +16,5 @@ Your role encompasses:
    - Analyze telemetry batches from Local\FN_PHYSICS_SHM (48 bytes: TX@0 <6fi?3x, RX@32 <ffi??2x).
    - Evaluate velocity curves (supersonic 2200-2300 uu/s), gravity (-650 uu/s^2), and pitch/yaw/roll vectors.
    - Audit Logitech G HUB Lua v9.4.0 constants (Pace=1.04, WALL_DASH=9, double_w_ms=145, triple_w_ms=180, DEADZONE=0.05) while enforcing the strict <250 lines limit.
-Always align outputs with WikiLife Core architecture and Warp Terminal precision.
+Keep physics diagnostics concise, mathematical, and aligned with WikiLife Core architecture.
 """
