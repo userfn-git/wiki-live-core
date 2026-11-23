@@ -1,30 +1,15 @@
-﻿# FN | WikiLife Core - المرجع الشخصي والجذع المعرفي (Yusra Trunk)
+﻿# WikiLife Core (wiki-live-core)
 
-[![WikiLife Core CI](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml)
+[![WikiLife Core CI](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml/badge.svg)](https://github.com/userfn-git/wiki-live-core/actions/workflows/ci.yml)
 
-> **المالك والمطور الرئيسي:** `userfn-git` (FN) | **الفرع المركزي المعتمد:** `main` | **بيئة العمل:** `FN-WORKSTATION (Win11 Pro / Python 3.12 / C++20 / GCP)`
+Central knowledge management, terminal governance, and local/cloud AI orchestration framework anchored by Yusra on FN-WORKSTATION.
 
----
+## Local Offline AI Engine (wikilife-yusra)
+- **Model Specs & Setup:** [models/README.md](models/README.md)
+- **Zero-Dependency Client:** [src/local_yusra.py](src/local_yusra.py)
+- **Tree Snapshot Archiver:** [src/snapshot_archiver.py](src/snapshot_archiver.py)
+- **Automated Unit Tests:** [tests/test_local_yusra.py](tests/test_local_yusra.py)
 
-## 1. هويتي البرمجية ونواة النظام (Personal Core)
-هذا المستودع هو المركز الشخصي الموحد لإدارة مشاريعي البرمجية، محركات الإدخال والأتمتة، والتوثيق المعرفي السحابي بإشراف **يسرى** على المسار المحلي `D:\projects\wiki-live-core`.
-
-## 2. بيئة التشغيل والعتاد المعتمد (System Stack)
-- **النظام المحلي:** Windows 11 Pro 64-bit | PowerShell & MSYS2 Bash
-- **لغات التطوير:** Python 3.12, C++20, Lua, REST APIs
-- **البنية السحابية:** Google Cloud (Cloud Run, Firestore, Cloud Functions) & GitHub SSH (`ED25519`)
-
-## 3. خريطة المسارات الأربعة والفروع الـ 12
-| المسار | الفروع | المهمة الخاصة بـ FN |
-|---|---|---|
-| **PATH-01: البنية والتحكم** | `BR01`..`BR03` | قفل الجذع `main`، محرك `Blob/Tree/Commit`، وتأمين `SSH` |
-| **PATH-02: إدارة المعرفة** | `BR04`..`BR06` | قرارات `ADR-0001..0012`، أرشفة `Snapshots`، وصياغة يسرى |
-| **PATH-03: التطوير والبرمجة** | `BR07`..`BR09` | فروع `Git-flow`، محولات السحابة، وفحص `GitHub Actions` |
-| **PATH-04: النشر والإحاطة** | `BR10`..`BR12` | بيانات `JSON-LD`، معايير `NPOV`، ومقاييس `FN Telemetry` |
-
-## 4. اختصاراتي السريعة (Quick Commands)
-- فحص النظام: `python tests/verify_all.py`
-- لوحة التحكم: `start chrome D:\projects\wiki-live-core\docs\dashboard.html`
-
----
-> **[MUTUAL-LOCK]:** Synchronized with [Gemini.md](./Gemini.md) on branch main.
+## Quick Terminal Commands
+- yusra : Launch interactive local Yusra session
+- yusra-stop : Unload model and free 6GB VRAM before gaming
