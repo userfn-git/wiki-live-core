@@ -9,7 +9,7 @@ OLLAMA_CHAT_URL = "http://127.0.0.1:11434/api/chat"
 MODEL_NAME      = "wikilife-yusra"
 ALLOWED_ROOT    = os.path.abspath(r"D:\projects")
 RL_API_HOST     = "127.0.0.1"
-RL_API_PORT     = 49123
+RL_API_PORT     = 49125
 
 VALID_COMMANDS = {
     "LoadReplay",
@@ -67,7 +67,7 @@ def write_project_file(path: str, content: str, auto_confirm: bool = False) -> s
     return f"Successfully wrote {len(content)} chars to {path}"
 
 def control_rocket_league_client(command: str, data: dict) -> str:
-    """Sends an official Epic Games MatchStatsExporter_TA two-way JSON command over TCP 49123."""
+    """Sends an official Epic Games MatchStatsExporter_TA two-way JSON command over TCP 49125."""
     if command not in VALID_COMMANDS:
         return json.dumps({"status": "error", "message": f"Invalid Command '{command}'. Allowed: {sorted(VALID_COMMANDS)}"})
 
@@ -159,7 +159,7 @@ TOOLS_SCHEMA = [
         "function": {
             "name": "control_rocket_league_client",
             "description": (
-                "Control Rocket League replay/spectator playback via Official Epic Games MatchStatsExporter_TA TCP 49123. "
+                "Control Rocket League replay/spectator playback via Official Epic Games MatchStatsExporter_TA TCP 49125. "
                 "Supports LoadReplay ({FileName or Path}), SeekReplay ({Frame or TimeSeconds}), "
                 "SetGameSpeed ({Speed >= 0}), ChangePOV ({Focus: 'Ball'|'<digits>', Perspective: 'Fly'|'SoftAttach'|'HardAttach'|'PlayerView'|'AutoCam'|'Camera_Director'}), "
                 "SetHUDVisibility ({bVisible: bool}), and SetMatchPaused ({bPaused: bool})."
