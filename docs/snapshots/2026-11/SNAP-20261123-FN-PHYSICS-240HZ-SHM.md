@@ -44,3 +44,14 @@ Completed the end-to-end, zero-mock, State-Driven closed-loop physics optimizati
 ## 4. Repository Synchronization State
 - **`D:\projects\fn_physics_engine` (`origin/main`):** Synchronized with official 120Hz two-way bridge, `DemosEpic` harvester, anti-stagnation time trainer, `yusra_curve_math_tuner.py`, and promoted Pure-ASCII `<250`-line Lua macro.
 - **`D:\projects\wiki-live-core` (`origin/main`):** Synchronized with `EPIC_STATS_API_SCHEMA.md`, `src/yusra_agent.py` Replay Director, and finalized `SNAP-20261123-FN-PHYSICS-240HZ-SHM.md`.
+---
+
+## Finalized Session Milestone: FN PRO v9.6.0 & WikiLife Cut-and-Purge Pipeline
+
+- **Lua Macro Finalized ($lineCount lines, Pure ASCII):** D:\Lua\FN_PRO_v9.4.0_FINAL.lua (v9.6.0 G502 X Q/E-Context Edition).
+  - **Engine Toggle:** MB3 (Middle Mouse Click) with deterministic 1ms PrecisionSleep and ClearAllInputs() failsafe.
+  - **Context Speedflips:** A + MB4 (Q) for Left Speedflip, D + MB5 (E) for Right Speedflip (leaves aerial Q/E unintercepted when A/D are released).
+  - **Ergonomic Half-Flip:** S + Left Shift with automatic Q/E roll direction detection and 480ms forward cancel.
+  - **Aerial & Dash Controls:** MB7 (Fast Aerial), MB8 (Hold-to-Loop ChainDash), G6 Sniper button excluded.
+- **Replay Harvester & Telemetry:** Windows Shell MyDocuments (D:\Documents\My Games\Rocket League\TAGame) unified via NTFS Junctions with icacls Full Control; yusra_autoplan_daemon.py cuts & purges replays directly to D:\projects\wiki-live-core\data\replays_vault and generates rrocket.exe analytics debriefs.
+- **In-Game Curve HUD:** Replaced external Chrome plotting with yusra_ingame_curve_hud.py (127.0.0.1:49125 frameless overlay).
