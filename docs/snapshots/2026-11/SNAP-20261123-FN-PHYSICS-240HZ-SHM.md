@@ -1,38 +1,38 @@
-# SNAP-20261123: FN Physics Engine, Authentic Telemetry Gate & Unified WikiLife-Yusra Agent
+# SNAP-20261123: FN Physics Engine, Epic Games DemosEpic Auto-Harvester & WikiLife-Yusra Closed-Loop System
 
 - **Date:** 2026-11-23
 - **Tree Path & Branch:** `PATH-02: Knowledge Management` -> `BR05: Gemini Session Tree Snapshots`
 - **Target Repositories:** `D:\projects\fn_physics_engine` & `D:\projects\wiki-live-core`
-- **Workstation Profile:** `FN-WORKSTATION` (Windows 11 Pro, MSYS2 UCRT64 GCC 16.2.0, Python 3.12 `D:\envs\rl_py_env`, GTX 1660 Ti 6GB VRAM, 32GB RAM, Isolated `D:\`)
+- **Workstation Profile:** `FN-WORKSTATION` (Windows 11 Pro, MSYS2 UCRT64 GCC 16.2.0, Python 3.12 `D:\envs\rl_py_env`, GTX 1660 Ti 6GB VRAM, 32GB RAM, Strict `D:\` Isolation)
 
 ---
 
 ## 1. Executive Summary
-Completed the transition from synthetic telemetry testing to a strictly authentic, zero-mock telemetry and autonomous local AI execution architecture. All workflows are unified under a single hierarchical CLI entrypoint (`rl`) inside `D:\terminals\config\master_profile.ps1`, backed by the local tool-calling agent `wikilife-yusra` stored on `D:\Ollama\models`.
+Finalized the closed-loop, zero-mock, and zero-bloat physics optimization pipeline across `fn_physics_engine` and `wiki-live-core`. All Epic Games replay storage (`DemosEpic`) is isolated onto Drive `D:` via directory Junctions, harvested immediately into the WikiLife Vault upon save, decoded via `rrrocket.exe`, analyzed by local `wikilife-yusra`, and paired with a time-bound offline bot arena trainer (`rl train`) and safe macro auto-promoter (`rl auto`).
 
 ---
 
 ## 2. Verified Architectural Milestones
 
-1. **Zero-Mock Policy & `RocketLeague.exe` Process Gate (`yusra_telemetry_analyst.py`):**
-   - Purged synthetic CSV records and enforced an active `RocketLeague.exe` process check via `tasklist`.
-   - Live hardware KBM input capture (`W, A, S, D, LShift, LMB=Boost, RMB=Jump`, `dt_ms` frame delta at `120Hz`) executes **only** while `RocketLeague.exe` is running and halts immediately upon game exit.
-   - When offline, the analyst inspects authentic `.replay` files from `D:\Games\RocketLeague_Replays` or `TAGame\Demos` without fabricating telemetry.
+1. **Epic Games `DemosEpic` Junction Isolation & Zero-Bloat Replay Harvester (`tools/yusra_autoplan_daemon.py`):**
+   - Verified and enforced NTFS directory `Junction` links for `D:\Games\RocketLeague\TAGame\DemosEpic`, `D:\Games\RocketLeague_Config\TAGame\DemosEpic`, and `Documents\My Games\Rocket League\TAGame\DemosEpic` pointing exclusively to `D:\Games\RocketLeague_Replays` (zero `C:` drive dependency).
+   - Running `rl auto` (or `rl auto --watch`) harvests any newly saved `.replay` immediately after file-lock release and moves it into `D:\projects\wiki-live-core\data\replays_vault`, keeping game replay directories 100% empty to prevent in-game storage bloat or input feel degradation.
 
-2. **Authentic KBM & Frame-Delta Curve Plotter (`tools/plot_telemetry_curves.py`):**
-   - Aligned multi-panel `200-DPI` dark-mode chart generation with `LIVE_REAL_KBM` CSV logs.
-   - Renders three synchronized diagnostic panels: hardware polling jitter (`dt_ms` vs `8.33ms` 120Hz target), mouse/air-roll actuation overlays (`Boost`, `Jump`, `LShift`), and directional key states (`W/A/S/D`), auto-opening in Google Chrome via `rl plot`.
+2. **Authentic Replay Decoding & Multi-Panel Curve Plotting (`rrrocket.exe` + `tools/plot_telemetry_curves.py`):**
+   - Configured official `rrrocket.exe` CLI in `D:\Tools\rrrocket` to extract authentic `RigidBody` coordinates (`X, Y, Z`), attitude angles (`Pitch, Yaw, Roll`), and real velocity (`speed_uu`) into `logs/replay_physics_extracted.csv`.
+   - Generates executive match debriefs under `D:\projects\wiki-live-core\docs\match_analytics\` and renders 200-DPI dark-mode charts opened automatically in Google Chrome via `rl plot`.
 
-3. **Local Autonomous Tool-Calling Agent (`src/yusra_agent.py` & `wikilife-yusra`):**
-   - Migrated all Ollama model layers to `D:\Ollama\models` (`OLLAMA_MODELS`) and capped GPU layer allocation (`num_gpu 10`, `num_predict 2048`, `think=False`) for responsive coexistence with Rocket League on GTX 1660 Ti.
-   - Equipped `wikilife-yusra` with `run_powershell`, `write_project_file` (restricted to `D:\projects\`), and `read_project_file` under interactive `[SAFE-CONFIRM]` or `--auto` modes.
+3. **Time-Bound Anti-Stagnation Offline Bot Trainer (`tools/yusra_offline_trainer.py`):**
+   - Upgraded `rl train [2h|120m]` to execute time-scheduled `240Hz` kinematic arena rollouts grounded in real replay velocity ratios (`load_real_replay_baseline`).
+   - Enforced signature-based novelty (`seen` set + adaptive scale expansion) to prevent parameter stagnation, raising baseline fitness from `1822.717` to `2244.64` (`+23.15%`) and synthesizing pure-ASCII `<250`-line Logitech G HUB Lua candidates in `lua/candidates/`.
+   - Active `RocketLeague.exe` process watchdog halts simulation immediately upon game launch to yield 100% of GTX 1660 Ti and CPU resources.
 
-4. **Unified Hierarchical CLI (`rl <action>`) & Repository Hygiene:**
-   - Removed legacy `Alias:rl` conflicts from `D:\terminals\config\master_profile.ps1` and consolidated all actions into `rl` (`agent`, `live`, `play`, `yusra`, `plot`, `status`, `stop`).
-   - Maintained inverted `D:\Lua` Junction pointing to `D:\projects\fn_physics_engine\lua` (`FN_PRO_v9.4.0_FINAL.lua` at `218/250` lines) and cleaned stray files (`lua/rl_local_game.lu`).
+4. **Safe Gate Macro Auto-Promotion & Unified 11-Action `rl` CLI (`D:\terminals\config\master_profile.ps1`):**
+   - `rl auto` enforces a `>= 5.0%` fitness gain gate before archiving `D:\Lua\FN_PRO_v9.4.0_FINAL.lua` to `lua/archive/`, promoting the winning candidate, and copying the clean Lua code to the Windows Clipboard (`rl lua`).
+   - Consolidated all operational workflows into `rl` (`agent`, `train`, `auto`, `live`, `play`, `yusra`, `replay`, `plot`, `lua`, `status`, `stop`).
 
 ---
 
-## 3. Verification Status
-- **`D:\projects\fn_physics_engine` (`origin/main`):** Clean working tree; zero-mock process gate and authentic KBM plotter active.
-- **`D:\projects\wiki-live-core` (`origin/main`):** Updated `Modelfile.yusra`, `src/yusra_agent.py`, and Session Tree Snapshot `SNAP-20261123-FN-PHYSICS-240HZ-SHM.md`.
+## 3. Repository Synchronization State
+- **`D:\projects\fn_physics_engine` (`origin/main`):** Up to date with `DemosEpic` harvester, anti-stagnation time trainer, `rrrocket` spatial parser, and dual-mode plotter.
+- **`D:\projects\wiki-live-core` (`origin/main`):** Updated `SNAP-20261123-FN-PHYSICS-240HZ-SHM.md` under `PATH02-BR05` with active `data/replays_vault` and `docs/match_analytics` integration.
