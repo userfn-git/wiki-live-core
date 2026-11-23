@@ -39,3 +39,8 @@ venv/
 # Local workstation captures and utility scripts
 obs-studio/
 Force-FixTAInputACL.ps1
+
+# Ignore heavy local model weights
+*.gguf
+*.bin
+*.safetensors
