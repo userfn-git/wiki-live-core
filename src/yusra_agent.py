@@ -1,26 +1,128 @@
 import json
 import os
+import socket
 import subprocess
 import sys
 import urllib.request
 
 OLLAMA_CHAT_URL = "http://127.0.0.1:11434/api/chat"
-MODEL_NAME = "wikilife-yusra"
+MODEL_NAME      = "wikilife-yusra"
+ALLOWED_ROOT    = os.path.abspath(r"D:\projects")
+RL_API_HOST     = "127.0.0.1"
+RL_API_PORT     = 49123
 
-TOOLS = [
+VALID_COMMANDS = {
+    "LoadReplay",
+    "SeekReplay",
+    "SetGameSpeed",
+    "ChangePOV",
+    "SetHUDVisibility",
+    "SetMatchPaused"
+}
+
+VALID_PERSPECTIVES = {
+    "Fly",
+    "SoftAttach",
+    "HardAttach",
+    "PlayerView",
+    "AutoCam",
+    "Camera_Director"
+}
+
+def is_path_safe(target_path: str) -> bool:
+    abs_p = os.path.abspath(target_path)
+    return abs_p.startswith(ALLOWED_ROOT)
+
+def run_powershell(command: str, auto_confirm: bool = False) -> str:
+    if not auto_confirm:
+        ans = input(f"\n[SAFE-CONFIRM] Execute PowerShell command?\n  > {command}\nApprove [y/N]: ").strip().lower()
+        if ans not in ("y", "yes"):
+            return "Execution denied by user."
+    proc = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command],
+        capture_output=True, text=True, encoding="utf-8", errors="replace"
+    )
+    out = (proc.stdout or "").strip()
+    err = (proc.stderr or "").strip()
+    return json.dumps({"exit_code": proc.returncode, "stdout": out[:4000], "stderr": err[:2000]})
+
+def read_project_file(path: str) -> str:
+    if not is_path_safe(path):
+        return f"Access denied: path must be inside {ALLOWED_ROOT}"
+    if not os.path.isfile(path):
+        return f"File not found: {path}"
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
+        return f.read()[:8000]
+
+def write_project_file(path: str, content: str, auto_confirm: bool = False) -> str:
+    if not is_path_safe(path):
+        return f"Access denied: path must be inside {ALLOWED_ROOT}"
+    if not auto_confirm:
+        ans = input(f"\n[SAFE-CONFIRM] Write {len(content)} chars to {path}?\nApprove [y/N]: ").strip().lower()
+        if ans not in ("y", "yes"):
+            return "File write denied by user."
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(content)
+    return f"Successfully wrote {len(content)} chars to {path}"
+
+def control_rocket_league_client(command: str, data: dict) -> str:
+    """Sends an official Epic Games MatchStatsExporter_TA two-way JSON command over TCP 49123."""
+    if command not in VALID_COMMANDS:
+        return json.dumps({"status": "error", "message": f"Invalid Command '{command}'. Allowed: {sorted(VALID_COMMANDS)}"})
+
+    if not isinstance(data, dict):
+        return json.dumps({"status": "error", "message": "Data must be a JSON object."})
+
+    # Validate official Epic Games schema constraints
+    if command == "ChangePOV":
+        focus = data.get("Focus")
+        persp = data.get("Perspective")
+        if focus is None and persp is None:
+            return json.dumps({"status": "error", "message": "ChangePOV requires at least Focus or Perspective."})
+        if focus is not None and focus != "Ball" and not str(focus).isdigit():
+            return json.dumps({"status": "error", "message": "Focus must be 'Ball' or an all-digits player shortcut string (e.g. '1')."})
+        if persp is not None and persp not in VALID_PERSPECTIVES:
+            return json.dumps({"status": "error", "message": f"Invalid Perspective '{persp}'. Allowed: {sorted(VALID_PERSPECTIVES)}"})
+
+    elif command == "LoadReplay":
+        if not data.get("FileName") and not data.get("Path"):
+            return json.dumps({"status": "error", "message": "LoadReplay requires FileName or Path."})
+
+    elif command == "SeekReplay":
+        if data.get("Frame") is None and data.get("TimeSeconds") is None:
+            return json.dumps({"status": "error", "message": "SeekReplay requires Frame or TimeSeconds."})
+
+    elif command == "SetGameSpeed":
+        spd = data.get("Speed")
+        if spd is None or float(spd) < 0.0:
+            return json.dumps({"status": "error", "message": "SetGameSpeed requires Speed >= 0."})
+
+    elif command == "SetHUDVisibility":
+        if not isinstance(data.get("bVisible"), bool):
+            return json.dumps({"status": "error", "message": "SetHUDVisibility requires boolean bVisible."})
+
+    elif command == "SetMatchPaused":
+        if not isinstance(data.get("bPaused"), bool):
+            return json.dumps({"status": "error", "message": "SetMatchPaused requires boolean bPaused."})
+
+    envelope = json.dumps({"Command": command, "Data": data}) + "\n"
+    try:
+        with socket.create_connection((RL_API_HOST, RL_API_PORT), timeout=3.0) as s:
+            s.sendall(envelope.encode("utf-8"))
+        return json.dumps({"status": "sent", "target": f"{RL_API_HOST}:{RL_API_PORT}", "payload": json.loads(envelope)})
+    except Exception as exc:
+        return json.dumps({"status": "socket_error", "message": f"Could not reach Rocket League Stats API on {RL_API_HOST}:{RL_API_PORT}: {exc}"})
+
+TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
             "name": "run_powershell",
-            "description": "Execute a pure-English PowerShell command on Windows 11 (Drive D: workspace) and return stdout/stderr.",
+            "description": "Execute a PowerShell command on the Windows workstation.",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "command": {
-                        "type": "string",
-                        "description": "Pure English PowerShell command to run (no Arabic characters inside code)."
-                    }
-                },
+                "properties": {"command": {"type": "string"}},
                 "required": ["command"]
             }
         }
@@ -28,13 +130,25 @@ TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "read_project_file",
+            "description": "Read a file inside D:\\projects.",
+            "parameters": {
+                "type": "object",
+                "properties": {"path": {"type": "string"}},
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "write_project_file",
-            "description": "Write UTF-8 (no BOM) content to a file inside D:\\projects.",
+            "description": "Write or update a file inside D:\\projects.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string", "description": "Absolute path under D:\\projects"},
-                    "content": {"type": "string", "description": "File content"}
+                    "path": {"type": "string"},
+                    "content": {"type": "string"}
                 },
                 "required": ["path", "content"]
             }
@@ -43,80 +157,57 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "read_project_file",
-            "description": "Read text content from a file on Drive D:.",
+            "name": "control_rocket_league_client",
+            "description": (
+                "Control Rocket League replay/spectator playback via Official Epic Games MatchStatsExporter_TA TCP 49123. "
+                "Supports LoadReplay ({FileName or Path}), SeekReplay ({Frame or TimeSeconds}), "
+                "SetGameSpeed ({Speed >= 0}), ChangePOV ({Focus: 'Ball'|'<digits>', Perspective: 'Fly'|'SoftAttach'|'HardAttach'|'PlayerView'|'AutoCam'|'Camera_Director'}), "
+                "SetHUDVisibility ({bVisible: bool}), and SetMatchPaused ({bPaused: bool})."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string", "description": "Absolute file path"}
+                    "command": {"type": "string", "enum": sorted(VALID_COMMANDS)},
+                    "data": {"type": "object"}
                 },
-                "required": ["path"]
+                "required": ["command", "data"]
             }
         }
     }
 ]
 
-def exec_tool(name: str, args: dict, auto_approve: bool = False) -> str:
-    if name == "run_powershell":
-        cmd = args.get("command", "")
-        print(f"\n[YUSRA TOOL -> PowerShell]\n{cmd}\n", flush=True)
-        if not auto_approve:
-            ans = input("Execute this command? [y/N]: ").strip().lower()
-            if ans != "y":
-                return "Execution denied by user."
-        res = subprocess.run(
-            ["powershell.exe", "-NoProfile", "-Command", cmd],
-            capture_output=True, text=True, encoding="utf-8", errors="replace"
-        )
-        out = (res.stdout or "") + (res.stderr or "")
-        return out.strip() if out.strip() else f"(ExitCode={res.returncode}, no output)"
+def call_ollama_chat(messages: list) -> dict:
+    payload = json.dumps({
+        "model": MODEL_NAME,
+        "messages": messages,
+        "tools": TOOLS_SCHEMA,
+        "think": False,
+        "stream": False
+    }).encode("utf-8")
+    req = urllib.request.Request(OLLAMA_CHAT_URL, data=payload, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        return json.loads(resp.read().decode("utf-8"))
 
-    if name == "write_project_file":
-        path = args.get("path", "")
-        if not path.lower().startswith("d:\\projects\\"):
-            return "Security policy: writes restricted to D:\\projects\\ only."
-        print(f"\n[YUSRA TOOL -> Write File] {path}", flush=True)
-        if not auto_approve:
-            ans = input("Allow file write? [y/N]: ").strip().lower()
-            if ans != "y":
-                return "Write denied by user."
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(args.get("content", ""))
-        return f"Successfully wrote {path}"
+def agent_loop(auto_confirm: bool = False):
+    print("=========================================================================", flush=True)
+    print(f"  WIKILIFE-YUSRA LOCAL AGENT ({MODEL_NAME}) | REPLAY DIRECTOR ARMED", flush=True)
+    print(f"  Workspace Scope: {ALLOWED_ROOT} | RL Two-Way Socket: {RL_API_HOST}:{RL_API_PORT}", flush=True)
+    print("  Type 'exit' or 'quit' to close.", flush=True)
+    print("=========================================================================", flush=True)
 
-    if name == "read_project_file":
-        path = args.get("path", "")
-        if not os.path.isfile(path):
-            return f"File not found: {path}"
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
-            return f.read()[:12000]
-
-    return f"Unknown tool: {name}"
-
-def chat_loop(auto_approve: bool = False):
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are Yusra (يسرى), the autonomous local execution agent under WikiLife Core. "
-                "You have direct terminal and file tools (run_powershell, write_project_file, read_project_file). "
-                "When the user asks to inspect, build, git-push, or modify anything in D:\\projects, "
-                "call your tools directly using pure English PowerShell commands (zero Arabic inside PowerShell code). "
-                "Respond to the user in clear Saudi Arabic outside tool calls."
-            )
-        }
-    ]
-    mode_label = "AUTO-EXEC" if auto_approve else "SAFE-CONFIRM"
-    print("============================================================", flush=True)
-    print(f"  WIKILIFE-YUSRA LOCAL AGENT ({MODEL_NAME}) [{mode_label}]", flush=True)
-    print("  Type your instruction (or 'exit' to quit)", flush=True)
-    print("============================================================", flush=True)
+    system_msg = (
+        "You are Yusra (wikilife-yusra), the cognitive engineering co-pilot for WikiLife Core and FN Physics Engine. "
+        "Respond in clear colloquial Saudi Arabic outside code blocks, while commands and code are pure English. "
+        "You can inspect files in D:\\projects, run PowerShell commands, and direct Rocket League replays via "
+        "control_rocket_league_client (LoadReplay, SeekReplay, SetGameSpeed, ChangePOV, SetHUDVisibility, SetMatchPaused)."
+    )
+    messages = [{"role": "system", "content": system_msg}]
 
     while True:
         try:
-            user_input = input("\nFN > ").strip()
+            user_input = input("\nyusra> ").strip()
         except (EOFError, KeyboardInterrupt):
+            print("\n[AGENT EXIT]", flush=True)
             break
         if not user_input:
             continue
@@ -126,42 +217,37 @@ def chat_loop(auto_approve: bool = False):
         messages.append({"role": "user", "content": user_input})
 
         while True:
-            print("[Yusra processing...]", flush=True)
-            payload = json.dumps({
-                "model": MODEL_NAME,
-                "messages": messages,
-                "tools": TOOLS,
-                "think": False,
-                "stream": False
-            }).encode("utf-8")
-            req = urllib.request.Request(OLLAMA_CHAT_URL, data=payload, headers={"Content-Type": "application/json"})
-            try:
-                with urllib.request.urlopen(req, timeout=120) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-            except Exception as e:
-                print(f"[OLLAMA ERROR]: {e}", flush=True)
-                break
-
-            msg = data.get("message", {})
+            resp = call_ollama_chat(messages)
+            msg = resp.get("message", {})
             messages.append(msg)
             tool_calls = msg.get("tool_calls") or []
 
             if not tool_calls:
-                content = (msg.get("content") or "").strip()
-                if not content and msg.get("thinking"):
-                    content = "[Thinking output only]:\n" + msg.get("thinking").strip()
-                print(f"\n[Yusra]:\n{content if content else '(Empty response from model)'}", flush=True)
+                print("\n" + (msg.get("content") or "").strip(), flush=True)
                 break
 
             for tc in tool_calls:
                 fn = tc.get("function", {})
                 fn_name = fn.get("name", "")
-                fn_args = fn.get("arguments", {})
-                if isinstance(fn_args, str):
-                    fn_args = json.loads(fn_args)
-                result = exec_tool(fn_name, fn_args, auto_approve=auto_approve)
+                args = fn.get("arguments") or {}
+                if isinstance(args, str):
+                    args = json.loads(args)
+
+                print(f"[TOOL CALL] {fn_name}({json.dumps(args)})", flush=True)
+                if fn_name == "run_powershell":
+                    result = run_powershell(args.get("command", ""), auto_confirm=auto_confirm)
+                elif fn_name == "read_project_file":
+                    result = read_project_file(args.get("path", ""))
+                elif fn_name == "write_project_file":
+                    result = write_project_file(args.get("path", ""), args.get("content", ""), auto_confirm=auto_confirm)
+                elif fn_name == "control_rocket_league_client":
+                    result = control_rocket_league_client(args.get("command", ""), args.get("data", {}))
+                else:
+                    result = f"Unknown tool: {fn_name}"
+
+                print(f"[TOOL RESULT] {result[:300]}", flush=True)
                 messages.append({"role": "tool", "content": result})
 
 if __name__ == "__main__":
-    auto_flag = "--auto" in sys.argv
-    chat_loop(auto_approve=auto_flag)
+    auto_mode = "--auto" in sys.argv
+    agent_loop(auto_confirm=auto_mode)
