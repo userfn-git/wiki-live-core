@@ -1,4 +1,4 @@
-# SNAP-20261123: FN Physics Engine, Epic Games DemosEpic Auto-Harvester & WikiLife-Yusra Closed-Loop System
+# SNAP-20261123: FN Physics Engine, Official Epic Games Two-Way API, Adaptive Curve Tuner & State-Driven WikiLife-Yusra Architecture
 
 - **Date:** 2026-11-23
 - **Tree Path & Branch:** `PATH-02: Knowledge Management` -> `BR05: Gemini Session Tree Snapshots`
@@ -8,31 +8,39 @@
 ---
 
 ## 1. Executive Summary
-Finalized the closed-loop, zero-mock, and zero-bloat physics optimization pipeline across `fn_physics_engine` and `wiki-live-core`. All Epic Games replay storage (`DemosEpic`) is isolated onto Drive `D:` via directory Junctions, harvested immediately into the WikiLife Vault upon save, decoded via `rrrocket.exe`, analyzed by local `wikilife-yusra`, and paired with a time-bound offline bot arena trainer (`rl train`) and safe macro auto-promoter (`rl auto`).
+Completed the end-to-end, zero-mock, State-Driven closed-loop physics optimization and telemetry ecosystem across `fn_physics_engine` and `wiki-live-core`. All Epic Games replay (`DemosEpic`) and configuration (`Config`) directories are isolated onto Drive `D:` via NTFS Junctions, paired with the official 120Hz `MatchStatsExporter_TA` two-way socket bridge, an adaptive Custom Map / Replay mathematical curve tuner (`rl tune`), an interactive Replay Director inside `src/yusra_agent.py`, and self-healing Lua macro promotion.
 
 ---
 
 ## 2. Verified Architectural Milestones
 
-1. **Epic Games `DemosEpic` Junction Isolation & Zero-Bloat Replay Harvester (`tools/yusra_autoplan_daemon.py`):**
-   - Verified and enforced NTFS directory `Junction` links for `D:\Games\RocketLeague\TAGame\DemosEpic`, `D:\Games\RocketLeague_Config\TAGame\DemosEpic`, and `Documents\My Games\Rocket League\TAGame\DemosEpic` pointing exclusively to `D:\Games\RocketLeague_Replays` (zero `C:` drive dependency).
-   - Running `rl auto` (or `rl auto --watch`) harvests any newly saved `.replay` immediately after file-lock release and moves it into `D:\projects\wiki-live-core\data\replays_vault`, keeping game replay directories 100% empty to prevent in-game storage bloat or input feel degradation.
+### A. Strict Drive D: Isolation (`DemosEpic` & `Config` NTFS Junctions)
+- **Replay Storage Isolation:** Enforced directory `Junction` links for `D:\Games\RocketLeague\TAGame\DemosEpic`, `D:\Games\RocketLeague_Config\TAGame\DemosEpic`, and `Documents\My Games\Rocket League\TAGame\DemosEpic` pointing exclusively to `D:\Games\RocketLeague_Replays`.
+- **Configuration Isolation:** Enforced directory `Junction` linking `Documents\My Games\Rocket League\TAGame\Config` directly to `D:\Games\RocketLeague_Config\TAGame\Config`, eliminating all Unreal Engine 3 write footprint on Drive `C:` while preserving `0.05` deadzone and KBM bindings.
+- **Zero-Bloat Replay Vault Harvester (`rl auto`):** Moves saved `.replay` files immediately upon lock release from `D:\Games\RocketLeague_Replays` into `D:\projects\wiki-live-core\data\replays_vault`, keeping active game replay folders 100% empty.
 
-2. **Authentic Replay Decoding & Multi-Panel Curve Plotting (`rrrocket.exe` + `tools/plot_telemetry_curves.py`):**
-   - Configured official `rrrocket.exe` CLI in `D:\Tools\rrrocket` to extract authentic `RigidBody` coordinates (`X, Y, Z`), attitude angles (`Pitch, Yaw, Roll`), and real velocity (`speed_uu`) into `logs/replay_physics_extracted.csv`.
-   - Generates executive match debriefs under `D:\projects\wiki-live-core\docs\match_analytics\` and renders 200-DPI dark-mode charts opened automatically in Google Chrome via `rl plot`.
+### B. Official Epic Games `MatchStatsExporter_TA` Integration (Forms 1–4)
+- **Authoritative Schema Reference:** Archived complete field definitions, visibility flags (`CONDITIONAL`, `SPECTATOR`, `TEAM`, `REPLAY`), 15 match/replay lifecycle events, and 6 two-way socket commands in `D:\projects\wiki-live-core\docs\reference\EPIC_STATS_API_SCHEMA.md` (`PATH02-BR04`).
+- **120Hz Two-Way Stream Engine (`tools/official_stats_api_bridge.py` / `rl stats` & `rl cmd`):**
+  - Configured `D:\Games\RocketLeague\TAGame\Config\TAStatsAPI.ini` (`PacketSendRate=120`, `Port=49123`, `WebPort=49124`).
+  - Streams and segregates live telemetry into 5 structured CSV logs (`official_stats_telemetry.csv`, `official_ball_hits.csv`, `official_boost_pickups.csv`, `official_goals_crossbars.csv`, `official_statfeed_events.csv`) while isolating goal replay frames (`GoalReplayStart` to `GoalReplayEnd`).
+  - Supports outbound JSON client control (`rl cmd`) for `LoadReplay`, `SeekReplay`, `SetGameSpeed`, `ChangePOV`, `SetHUDVisibility`, and `SetMatchPaused`.
 
-3. **Time-Bound Anti-Stagnation Offline Bot Trainer (`tools/yusra_offline_trainer.py`):**
-   - Upgraded `rl train [2h|120m]` to execute time-scheduled `240Hz` kinematic arena rollouts grounded in real replay velocity ratios (`load_real_replay_baseline`).
-   - Enforced signature-based novelty (`seen` set + adaptive scale expansion) to prevent parameter stagnation, raising baseline fitness from `1822.717` to `2244.64` (`+23.15%`) and synthesizing pure-ASCII `<250`-line Logitech G HUB Lua candidates in `lua/candidates/`.
-   - Active `RocketLeague.exe` process watchdog halts simulation immediately upon game launch to yield 100% of GTX 1660 Ti and CPU resources.
+### C. Adaptive Math Curve Tuner (`rl tune`) & Self-Healing Lua Promotion
+- **Custom Map & Replay Drag Analyzer (`tools/yusra_curve_math_tuner.py`):** Evaluates `turning_drag_ratio` (`avg_powerslide_speed / avg_speed`) and `supersonic_ratio` from official 120Hz telemetry, recalibrates shaping exponents (`curve_alpha`, `Pace`, `double_w_ms`, `triple_w_ms`), synthesizes Pure-ASCII `<250`-line candidates (`FN_PRO_CURVE_TUNED_*.lua`), and renders 200-DPI Before-vs-After comparison curves in Google Chrome.
+- **Time-Bound Anti-Stagnation Bot Arena (`rl train [2h|120m]`):** Enforces signature novelty (`seen` set + adaptive neighborhood expansion) grounded in official 120Hz telemetry and halts immediately when `RocketLeague.exe` launches.
+- **State-Driven Self-Healing Promotion:** Uses explicit `Test-Path` / `Get-ChildItem` state checks (compatible with silent error handling in `master_profile.ps1`) to archive `D:\Lua\FN_PRO_v9.4.0_FINAL.lua` into `lua/archive/`, promote verified candidates, and sync the Windows Clipboard via `rl lua`.
 
-4. **Safe Gate Macro Auto-Promotion & Unified 11-Action `rl` CLI (`D:\terminals\config\master_profile.ps1`):**
-   - `rl auto` enforces a `>= 5.0%` fitness gain gate before archiving `D:\Lua\FN_PRO_v9.4.0_FINAL.lua` to `lua/archive/`, promoting the winning candidate, and copying the clean Lua code to the Windows Clipboard (`rl lua`).
-   - Consolidated all operational workflows into `rl` (`agent`, `train`, `auto`, `live`, `play`, `yusra`, `replay`, `plot`, `lua`, `status`, `stop`).
+### D. Interactive Replay Director in Local Terminal Agent (`src/yusra_agent.py`)
+- Armed `wikilife-yusra` (`rl agent`) with `control_rocket_league_client` validated against official Epic Games schema constraints (`Focus` `"Ball"` or digit shortcut, 6 approved `Perspective` modes, `Speed >= 0`), enabling natural-language replay direction over TCP `127.0.0.1:49123`.
 
 ---
 
-## 3. Repository Synchronization State
-- **`D:\projects\fn_physics_engine` (`origin/main`):** Up to date with `DemosEpic` harvester, anti-stagnation time trainer, `rrrocket` spatial parser, and dual-mode plotter.
-- **`D:\projects\wiki-live-core` (`origin/main`):** Updated `SNAP-20261123-FN-PHYSICS-240HZ-SHM.md` under `PATH02-BR05` with active `data/replays_vault` and `docs/match_analytics` integration.
+## 3. Unified 13-Action `rl` CLI (`D:\terminals\config\master_profile.ps1`)
+- `rl agent [--auto]` | `rl train [2h|120m]` | `rl auto [--watch]` | `rl stats [Player]` | `rl cmd <Name> <Json>` | `rl tune` | `rl live` | `rl play` | `rl yusra` | `rl replay` | `rl plot` | `rl lua` | `rl status` | `rl stop`.
+
+---
+
+## 4. Repository Synchronization State
+- **`D:\projects\fn_physics_engine` (`origin/main`):** Synchronized with official 120Hz two-way bridge, `DemosEpic` harvester, anti-stagnation time trainer, `yusra_curve_math_tuner.py`, and promoted Pure-ASCII `<250`-line Lua macro.
+- **`D:\projects\wiki-live-core` (`origin/main`):** Synchronized with `EPIC_STATS_API_SCHEMA.md`, `src/yusra_agent.py` Replay Director, and finalized `SNAP-20261123-FN-PHYSICS-240HZ-SHM.md`.
