@@ -1,32 +1,38 @@
-name: WikiLife CI Architecture
+﻿name: WikiLife Core CI
 
 on:
   push:
-    branches: [ main, "PATH*" ]
+    branches:
+      - main
+      - 'PATH*-BR*'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  validate-tree:
+  verify-and-test:
+    name: Structural Integrity & Unit Tests (Python 3.12)
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Validate Core Architecture Tree
+      - name: Verify WikiLife Core Directory Structure
         run: |
-          echo "=== Validating WikiLife 4-Path & 12-Branch Structure ==="
-          python -c "
-          import os, sys
-          paths = ['docs/PATH-01_Control', 'docs/PATH-02_Knowledge', 'docs/PATH-03_Development', 'docs/PATH-04_Publishing', 'src/adapters', 'tests/docs']
-          missing = [p for p in paths if not os.path.exists(p)]
-          if missing:
-              print(f'Error: Missing structural paths: {missing}')
-              sys.exit(1)
-          print('Success: All 4 Paths and 12 Branches structure verified.')
-          "
+          test -d src
+          test -d docs
+          test -d tests
+          test -f models/Modelfile.yusra
+
+      - name: Run Python Unit Tests (Zero-Dependency)
+        run: |
+          python -m unittest discover -s tests -v
