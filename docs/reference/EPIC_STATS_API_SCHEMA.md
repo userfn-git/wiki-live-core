@@ -3,93 +3,56 @@
 - **Authoritative Source:** Epic Games / Psyonix Developer Documentation (`MatchStatsExporter_TA`)
 - **Configuration File:** `D:\Games\RocketLeague\TAGame\Config\TAStatsAPI.ini`
 - **Transport:** Local TCP (`127.0.0.1:49123`) & WebSocket (`127.0.0.1:49124`), capped at `120Hz` (`PacketSendRate=120`).
-- **Envelope Format:** `{"Event": "<EventName>", "Data": { ... }}`
-- **Visibility Flags:**
-  - `CONDITIONAL`: Present only when relevant.
-  - `SPECTATOR`: Sent only while spectating / replay playback.
-  - `TEAM`: Sent only for players on the local player's team.
-  - `REPLAY`: Relevant only during replay playback.
+- **Telemetry Envelope (Client -> Tool):** `{"Event": "<EventName>", "Data": { ... }}`
+- **Command Envelope (Tool -> Client):** `{"Command": "<CommandName>", "Data": { ... }}`
+- **Visibility Flags:** `CONDITIONAL` (when relevant), `SPECTATOR` (while spectating/replay), `TEAM` (same team), `REPLAY` (during replay playback).
 
 ---
 
-## 1. Periodic State Event: `UpdateState`
-
-### `Players[]` Object Fields
-| Field | Type | Visibility | Description |
-|---|---|---|---|
-| `Name` | `string` | All | Player display name. |
-| `PrimaryId` | `string` | All | Platform identifier (`Platform|Uid|Splitscreen`, e.g. `"Epic|456|0"`). |
-| `Shortcut` | `int` | All | Spectator shortcut index. |
-| `TeamNum` | `int` | All | Team index (`0 = Blue`, `1 = Orange`). |
-| `Score` | `int` | All | Total match score. |
-| `Goals` | `int` | All | Goals scored this match. |
-| `Shots` | `int` | All | Shot attempts this match. |
-| `Assists` | `int` | All | Assists earned this match. |
-| `Saves` | `int` | All | Saves made this match. |
-| `Touches` | `int` | All | Total ball touches. |
-| `CarTouches` | `int` | All | Touches by the car body (not ball). |
-| `Demos` | `int` | All | Demolitions inflicted. |
-| `Loadout` | `array<string>` | All | Equipped item asset names sorted by product slot. |
-| `bHasCar` | `bool` | `SPECTATOR` | True if the player currently has a vehicle. |
-| `Speed` | `float` | `SPECTATOR` | Vehicle speed in Unreal Units/second (`uu/s`). |
-| `Boost` | `int` | `SPECTATOR` | Boost amount `0-100`. |
-| `bBoosting` | `bool` | `SPECTATOR` | True if currently boosting. |
-| `bOnGround` | `bool` | `SPECTATOR` | True if at least 3 wheels touch the world (Flip-Reset contact truth). |
-| `bOnWall` | `bool` | `SPECTATOR` | True if the vehicle is on a wall (Wall-Dash state truth). |
-| `bPowersliding` | `bool` | `SPECTATOR` | True if holding handbrake (`Left Shift`). |
-| `bDemolished` | `bool` | `SPECTATOR` | True if vehicle is currently destroyed. |
-| `bSupersonic` | `bool` | `SPECTATOR` | True if vehicle is at supersonic speed (`>= 2200 uu/s`). |
-| `PickupClass` | `string` | `SPECTATOR` | Rumble powerup class name (omitted outside Rumble). |
-| `Attacker` | `object` | `CONDITIONAL` | Demolisher `{Name, Shortcut, TeamNum}` (present only when demolished). |
-
-### `Game` Object Fields
-| Field | Type | Visibility | Description |
-|---|---|---|---|
-| `Teams[]` | `array` | All | `{Name, TeamNum, Score, ColorPrimary, ColorSecondary}`. |
-| `PlaylistId` | `int` | All | Playlist ID of the current match. |
-| `TimeSeconds` | `int` | All | Seconds remaining in the match. |
-| `bOvertime` | `bool` | All | True if in overtime. |
-| `Ball` | `object` | All | `{Speed (float, uu/s), TeamNum (int, 255 if untouched)}`. |
-| `bReplay` | `bool` | All | True if goal replay or history replay is active. |
-| `bHasWinner` | `bool` | All | True if a team has won. |
-| `Winner` | `string` | All | Winning team name (empty string if none). |
-| `Arena` | `string` | All | Map asset name (e.g. `"Stadium_P"`). |
-| `bHasTarget` | `bool` | All | True if viewing a specific vehicle. |
-| `Target` | `object` | `CONDITIONAL` | Currently viewed vehicle `{Name, Shortcut, TeamNum}`. |
-| `Frame` | `int` | `CONDITIONAL` | Current frame number when replay is active. |
-| `Elapsed` | `float` | `CONDITIONAL` | Seconds elapsed since game start when replay is active. |
+## 1. Periodic Telemetry: `UpdateState`
+- **`Players[]`**: `Name`, `PrimaryId` (`Platform|Uid|Splitscreen`), `Shortcut`, `TeamNum` (`0=Blue, 1=Orange`), `Score`, `Goals`, `Shots`, `Assists`, `Saves`, `Touches`, `CarTouches`, `Demos`, `Loadout[]`, `bHasCar`, `Speed` (`uu/s`), `Boost` (`0-100`), `bBoosting`, `bOnGround` (`>=3 wheels`), `bOnWall`, `bPowersliding`, `bDemolished`, `bSupersonic`, `PickupClass`, `Attacker` (`{Name, Shortcut, TeamNum}`).
+- **`Game`**: `Teams[]` (`{Name, TeamNum, Score, ColorPrimary, ColorSecondary}`), `PlaylistId`, `TimeSeconds`, `bOvertime`, `Ball` (`{Speed, TeamNum}`), `bReplay`, `bHasWinner`, `Winner`, `Arena`, `bHasTarget`, `Target` (`{Name, Shortcut, TeamNum}`), `Frame` (`REPLAY`), `Elapsed` (`REPLAY`).
 
 ---
 
-## 2. Discrete Match Events (Forms 2 & 3)
+## 2. All Official Match & Replay Events (Forms 1 to 4)
 
-### `BallHit` (1 frame after impact)
-- `MatchGuid` (`string`): Set for online/LAN matches.
-- `Players[]`: `[{Name, Shortcut, TeamNum}]` (1 player = Solo Touch; >=2 players = 50/50 Challenge).
-- `Ball`: `{PreHitSpeed (float), PostHitSpeed (float), Location: {X, Y, Z}}`.
+### Gameplay & Physics Events
+- **`BallHit`** (1 frame after impact): `MatchGuid`, `Players[]` (`[{Name, Shortcut, TeamNum}]`), `Ball` (`{PreHitSpeed, PostHitSpeed, Location: {X, Y, Z}}`).
+- **`BoostPickup`** (`SPECTATOR`): `MatchGuid`, `Player` (`{Name, Shortcut, TeamNum}`), `Location` (`{X, Y, Z}`), `BoostAmount` (`float`), `BoostType` (`"BoostType_Pad"` | `"BoostType_Pill"`), `bReplay` (`bool`).
+- **`CrossbarHit`**: `MatchGuid`, `BallLocation` (`{X, Y, Z}`), `BallSpeed` (`float`), `ImpactForce` (`float`), `BallLastTouch` (`{Player, Speed}`).
+- **`GoalScored`**: `MatchGuid`, `GoalSpeed` (`float`), `GoalTime` (`float`), `ImpactLocation` (`{X, Y, Z}`), `Scorer` (`{Name, Shortcut, TeamNum}`), `Assister` (`CONDITIONAL`), `BallLastTouch` (`{Player, Speed}`).
+- **`StatfeedEvent`**: `MatchGuid`, `EventName` (e.g. `"Demolish"`, `"Save"`), `Type` (e.g. `"Demolition"`), `MainTarget` (`{Name, Shortcut, TeamNum}`), `SecondaryTarget` (`CONDITIONAL`, same shape).
 
-### `BoostPickup` (`SPECTATOR`)
-- `MatchGuid` (`string`), `Player`: `{Name, Shortcut, TeamNum}`, `Location`: `{X, Y, Z}`.
-- `BoostAmount` (`float`): Amount granted.
-- `BoostType` (`string`): `"BoostType_Pad"` (small pad) or `"BoostType_Pill"` (full 100 boost).
-- `bReplay` (`bool`): True if collected during replay playback.
+### Match & Round Lifecycle Events
+- **`MatchCreated`**: `{"MatchGuid": "..."}` — Sent when all teams are created and replicated.
+- **`MatchInitialized`**: `{"MatchGuid": "..."}` — Sent when the first countdown starts.
+- **`CountdownBegin`**: `{"MatchGuid": "..."}` — Sent at the start of each round countdown.
+- **`RoundStarted`**: `{"MatchGuid": "..."}` — Sent when active gameplay begins after countdown finishes.
+- **`ClockUpdatedSeconds`**: `{"MatchGuid": "...", "TimeSeconds": int, "bOvertime": bool}`.
+- **`MatchPaused`** / **`MatchUnpaused`**: `{"MatchGuid": "..."}` — Sent when paused/unpaused by match admin.
+- **`MatchEnded`**: `{"MatchGuid": "...", "WinnerTeamNum": int}` — Sent when match ends and winner is chosen.
+- **`PodiumStart`**: `{"MatchGuid": "..."}` — Sent when entering post-match podium state.
+- **`MatchDestroyed`**: `{"MatchGuid": "..."}` — Sent when leaving the game.
 
-### `ClockUpdatedSeconds`
-- `MatchGuid` (`string`), `TimeSeconds` (`int`), `bOvertime` (`bool`).
+### Replay Lifecycle Events
+- **`ReplayCreated`**: `{"MatchGuid": "", "FileName": "Stadium_P_2026-06-05_18-42", "Date": "2026-06-05 18:42:13"}` — Sent when a Match History replay is initialized.
+- **`GoalReplayStart`** / **`GoalReplayWillEnd`** / **`GoalReplayEnd`**: `{"MatchGuid": ""}` — Goal replay lifecycle markers.
 
-### `CountdownBegin`
-- `MatchGuid` (`string`): Emitted at the start of each kickoff countdown.
+---
 
-### `CrossbarHit`
-- `MatchGuid` (`string`), `BallLocation`: `{X, Y, Z}`, `BallSpeed` (`float`), `ImpactForce` (`float`).
-- `BallLastTouch`: `{Player: {Name, Shortcut, TeamNum}, Speed (float)}`.
+## 3. Two-Way Client Control Commands (Socket Ingestion)
 
-### `GoalScored`
-- `MatchGuid` (`string`), `GoalSpeed` (`float`), `GoalTime` (`float`), `ImpactLocation`: `{X, Y, Z}`.
-- `Scorer`: `{Name, Shortcut, TeamNum}`, `Assister`: `{Name, Shortcut, TeamNum}`.
-- `BallLastTouch`: `{Player: {Name, Shortcut, TeamNum}, Speed (float)}`.
-
-### Goal Replay Lifecycle Events
-- `GoalReplayStart`: `{"MatchGuid": ""}` — Emitted when goal replay starts.
-- `GoalReplayWillEnd`: `{"MatchGuid": ""}` — Emitted when ball explodes during goal replay (omitted if skipped).
-- `GoalReplayEnd`: `{"MatchGuid": ""}` — Emitted when goal replay ends.
+1. **`ChangePOV`** (`SPECTATOR`, `REPLAY`):
+   - `Focus`: `"Ball"` or `"<shortcut>"` (all digits string, e.g. `"1"`).
+   - `Perspective`: `"Fly"`, `"SoftAttach"`, `"HardAttach"`, `"PlayerView"`, `"AutoCam"`, `"Camera_Director"`.
+2. **`LoadReplay`**:
+   - `FileName` (`string`, takes precedence) or `Path` (`string`, full file path to `.replay`).
+3. **`SeekReplay`** (`REPLAY`):
+   - `Frame` (`int`, takes precedence) or `TimeSeconds` (`float`).
+4. **`SetGameSpeed`** (`REPLAY`):
+   - `Speed` (`float >= 0`, e.g. `0.5` half speed, `1.0` normal, `2.0` double).
+5. **`SetHUDVisibility`**:
+   - `bVisible` (`bool`).
+6. **`SetMatchPaused`**:
+   - `bPaused` (`bool`).
