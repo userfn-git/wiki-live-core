@@ -59,7 +59,7 @@ TOOLS = [
 def exec_tool(name: str, args: dict, auto_approve: bool = False) -> str:
     if name == "run_powershell":
         cmd = args.get("command", "")
-        print(f"\n[YUSRA TOOL -> PowerShell]\n{cmd}\n")
+        print(f"\n[YUSRA TOOL -> PowerShell]\n{cmd}\n", flush=True)
         if not auto_approve:
             ans = input("Execute this command? [y/N]: ").strip().lower()
             if ans != "y":
@@ -75,7 +75,7 @@ def exec_tool(name: str, args: dict, auto_approve: bool = False) -> str:
         path = args.get("path", "")
         if not path.lower().startswith("d:\\projects\\"):
             return "Security policy: writes restricted to D:\\projects\\ only."
-        print(f"\n[YUSRA TOOL -> Write File] {path}")
+        print(f"\n[YUSRA TOOL -> Write File] {path}", flush=True)
         if not auto_approve:
             ans = input("Allow file write? [y/N]: ").strip().lower()
             if ans != "y":
@@ -108,10 +108,10 @@ def chat_loop(auto_approve: bool = False):
         }
     ]
     mode_label = "AUTO-EXEC" if auto_approve else "SAFE-CONFIRM"
-    print("============================================================")
-    print(f"  WIKILIFE-YUSRA LOCAL AGENT ({MODEL_NAME}) [{mode_label}]")
-    print("  Type your instruction (or 'exit' to quit)")
-    print("============================================================")
+    print("============================================================", flush=True)
+    print(f"  WIKILIFE-YUSRA LOCAL AGENT ({MODEL_NAME}) [{mode_label}]", flush=True)
+    print("  Type your instruction (or 'exit' to quit)", flush=True)
+    print("============================================================", flush=True)
 
     while True:
         try:
@@ -126,22 +126,31 @@ def chat_loop(auto_approve: bool = False):
         messages.append({"role": "user", "content": user_input})
 
         while True:
+            print("[Yusra processing...]", flush=True)
             payload = json.dumps({
                 "model": MODEL_NAME,
                 "messages": messages,
                 "tools": TOOLS,
+                "think": False,
                 "stream": False
             }).encode("utf-8")
             req = urllib.request.Request(OLLAMA_CHAT_URL, data=payload, headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=120) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
+            try:
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+            except Exception as e:
+                print(f"[OLLAMA ERROR]: {e}", flush=True)
+                break
 
             msg = data.get("message", {})
             messages.append(msg)
             tool_calls = msg.get("tool_calls") or []
 
             if not tool_calls:
-                print(f"\n[Yusra]:\n{msg.get('content', '')}")
+                content = (msg.get("content") or "").strip()
+                if not content and msg.get("thinking"):
+                    content = "[Thinking output only]:\n" + msg.get("thinking").strip()
+                print(f"\n[Yusra]:\n{content if content else '(Empty response from model)'}", flush=True)
                 break
 
             for tc in tool_calls:
