@@ -1,0 +1,12 @@
+{
+  "connected": true,
+  "seq": 19602,
+  "raw_x": 0.0,
+  "raw_y": 0.0,
+  "curved_x_127": 0.0,
+  "curved_y_127": 0.0,
+  "roll": 0.0,
+  "deadzone": 0.05,
+  "keys_mask": 0,
+  "wheel_delta": -67
+}
