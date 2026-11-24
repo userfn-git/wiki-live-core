@@ -1,7 +1,9 @@
 import json
 import os
+import re
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from datetime import datetime
 
@@ -19,8 +21,8 @@ SYNC_QUEUE = r"D:\projects\wiki-live-core\docs\offline_sync_queue.jsonl"
 SYSTEM_GUARD = (
     "You are Yusra (يسرى), strictly a local terminal and workspace agent under WikiLife Core "
     "(4 Paths / 12 Branches). Never invent fictional files, zodiac/astrology topics, or fake Git pushes. "
-    "Always inspect real directories/files in D:\\projects\\wiki-live-core, D:\\projects\\fn_physics_engine, "
-    "D:\\projects\\fn_physics_engine\\math, or D:\\Lua before reporting file states. "
+    "Always report real files only from D:\\projects\\wiki-live-core, D:\\projects\\fn_physics_engine, "
+    "D:\\projects\\fn_physics_engine\\math, or D:\\Lua. "
     "Write explanations in clean colloquial Saudi Arabic outside code blocks, with pure English code/commands."
 )
 
@@ -67,25 +69,7 @@ def read_file(path: str, branch: str = "PATH02-BR04") -> str:
     record_event(branch, "READ_FILE", target, f"Chars={len(data)}")
     return data[:24000]
 
-def write_file(path: str, content: str, branch: str = "PATH03-BR07") -> str:
-    target = resolve_safe(path)
-    existed = os.path.isfile(target)
-    os.makedirs(os.path.dirname(target), exist_ok=True)
-    with open(target, "w", encoding="utf-8", newline="\n") as f:
-        f.write(content)
-    op = "UPDATED" if existed else "CREATED"
-    record_event(branch, op, target, f"Bytes={os.path.getsize(target)}")
-    return f"[OK] {op} ({branch}): {target}"
-
-def delete_file(path: str, branch: str = "PATH01-BR01") -> str:
-    target = resolve_safe(path)
-    if not os.path.isfile(target):
-        return f"[SKIP] File not found: {target}"
-    os.remove(target)
-    record_event(branch, "DELETED", target, "Removed locally in terminal mode")
-    return f"[OK] DELETED ({branch}): {target}"
-
-def run_local_terminal(command: str, cwd: str = r"D:\projects\wiki-live-core", branch: str = "PATH03-BR07") -> str:
+def run_local_terminal(command: str, cwd: str = r"D:\projects\fn_physics_engine\math", branch: str = "PATH03-BR07") -> str:
     safe_cwd = resolve_safe(cwd)
     blocked = ("invoke-webrequest", "curl ", "wget ", "start-bitstransfer")
     low = command.lower()
@@ -130,34 +114,6 @@ TOOLS_SPEC = [
     {
         "type": "function",
         "function": {
-            "name": "write_file",
-            "description": "Create or update a UTF-8 file in an allowed local workspace.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string"},
-                    "content": {"type": "string"},
-                    "branch": {"type": "string"},
-                },
-                "required": ["path", "content"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "delete_file",
-            "description": "Remove an obsolete file in an allowed local workspace.",
-            "parameters": {
-                "type": "object",
-                "properties": {"path": {"type": "string"}, "branch": {"type": "string"}},
-                "required": ["path"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
             "name": "run_local_terminal",
             "description": "Run a local PowerShell command inside an allowed workspace without internet access.",
             "parameters": {
@@ -176,34 +132,79 @@ TOOLS_SPEC = [
 TOOL_FN = {
     "list_dir": list_dir,
     "read_file": read_file,
-    "write_file": write_file,
-    "delete_file": delete_file,
     "run_local_terminal": run_local_terminal,
 }
 
-def call_ollama(messages):
-    payload = json.dumps(
-        {"model": MODEL_NAME, "messages": messages, "tools": TOOLS_SPEC, "stream": False}
-    ).encode("utf-8")
+def post_chat(body: dict) -> dict:
+    payload = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(
         OLLAMA_URL, data=payload, headers={"Content-Type": "application/json"}
     )
     with urllib.request.urlopen(req, timeout=120) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
+def call_ollama(messages, use_tools: bool = False) -> tuple[dict, bool]:
+    body = {"model": MODEL_NAME, "messages": messages, "stream": False}
+    if use_tools:
+        body["tools"] = TOOLS_SPEC
+    try:
+        return post_chat(body), use_tools
+    except urllib.error.HTTPError as exc:
+        err_detail = ""
+        try:
+            err_detail = exc.read().decode("utf-8", errors="replace").strip()
+        except Exception:
+            err_detail = str(exc)
+        if use_tools and exc.code == 400:
+            print(f"[INFO] Ollama /api/chat returned HTTP 400 with tools ({err_detail}); retrying without tools schema.")
+            fallback_body = {"model": MODEL_NAME, "messages": messages, "stream": False}
+            return post_chat(fallback_body), False
+        raise RuntimeError(f"Ollama HTTP {exc.code}: {err_detail}") from exc
+
 def run_task(prompt: str) -> None:
+    math_dir = r"D:\projects\fn_physics_engine\math"
+    snapshot_files = list_dir(math_dir, "PATH01-BR01")
+    math_file_path = os.path.join(math_dir, "fn_1v1_curve_math.py")
+    math_preview = read_file(math_file_path, "PATH02-BR04") if os.path.isfile(math_file_path) else "(no fn_1v1_curve_math.py yet)"
+
+    enriched_prompt = (
+        f"{prompt}\n\n"
+        f"[GROUNDED WORKSPACE SNAPSHOT]\n"
+        f"Directory: {math_dir}\n"
+        f"Entries:\n{snapshot_files}\n\n"
+        f"File: {math_file_path}\n"
+        f"Content:\n{math_preview[:4000]}"
+    )
+
     messages = [
         {"role": "system", "content": SYSTEM_GUARD},
-        {"role": "user", "content": prompt},
+        {"role": "user", "content": enriched_prompt},
     ]
-    for _ in range(12):
-        res = call_ollama(messages)
+    use_tools = False
+    for _ in range(6):
+        res, use_tools = call_ollama(messages, use_tools=use_tools)
         msg = res.get("message", {})
         messages.append(msg)
         tool_calls = msg.get("tool_calls") or []
         if not tool_calls:
+            txt = msg.get("content", "")
+            # Also support optional [[LIST_DIR: ...]] or [[READ_FILE: ...]] markers if emitted
+            markers = re.findall(r"\[\[(LIST_DIR|READ_FILE):\s*([^\]]+)\]\]", txt)
+            if markers:
+                extra_out = []
+                for m_type, m_path in markers:
+                    p_clean = m_path.strip().strip('"').strip("'")
+                    try:
+                        if m_type == "LIST_DIR":
+                            extra_out.append(list_dir(p_clean, "PATH01-BR01"))
+                        elif m_type == "READ_FILE":
+                            extra_out.append(read_file(p_clean, "PATH02-BR04"))
+                    except Exception as ex:
+                        extra_out.append(f"[ERR] {ex}")
+                messages.append({"role": "user", "content": "Tool output:\n" + "\n---\n".join(extra_out)})
+                continue
             print("\n--- YUSRA LOCAL TERMINAL RESPONSE ---")
-            print(msg.get("content", ""))
+            print(txt)
             return
         for tc in tool_calls:
             fn_info = tc.get("function", {})
@@ -221,6 +222,6 @@ if __name__ == "__main__":
     task = (
         " ".join(sys.argv[1:]).strip()
         if len(sys.argv) > 1
-        else "Inspect D:\\projects\\wiki-live-core, D:\\projects\\fn_physics_engine\\math, and D:\\Lua under PATH01-BR01 using tools and report real files only."
+        else "Inspect D:\\projects\\fn_physics_engine\\math under PATH01-BR01 and summarize the math files."
     )
     run_task(task)
