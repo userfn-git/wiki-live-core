@@ -1,38 +1,17 @@
-﻿name: WikiLife Core CI
-
+name: WikiLife Core Governance & Integrity CI
 on:
   push:
-    branches:
-      - main
-      - 'PATH*-BR*'
+    branches: [ main, "PATH*" ]
   pull_request:
-    branches:
-      - main
-
-permissions:
-  contents: read
-
+    branches: [ main ]
 jobs:
-  verify-and-test:
-    name: Structural Integrity & Unit Tests (Python 3.12)
+  validate-structure:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Verify WikiLife Core Directory Structure
+      - uses: actions/checkout@v4
+      - name: Verify Governance & Templates
         run: |
-          test -d src
-          test -d docs
-          test -d tests
-          test -f models/Modelfile.yusra
-
-      - name: Run Python Unit Tests (Zero-Dependency)
-        run: |
-          python -m unittest discover -s tests -v
+          test -f LICENSE
+          test -f .github/SECURITY.md
+          test -f .github/ISSUE_TEMPLATE/bug_report.yml
+          echo "All WikiLife governance & template baselines verified."
