@@ -1,0 +1,51 @@
+name: WikiLife Core CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  verify-12-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify 4 Paths and 12 Branches Structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected=(
+            "PATH01-BR01_Central-Control"
+            "PATH01-BR02_Cloud-Architecture"
+            "PATH01-BR03_Security-Access"
+            "PATH02-BR04_Reference-Docs"
+            "PATH02-BR05_Chat-Archiving"
+            "PATH02-BR06_Yusra-NLP"
+            "PATH03-BR07_Code-Repos"
+            "PATH03-BR08_API-Adapters"
+            "PATH03-BR09_CICD-Pipelines"
+            "PATH04-BR10_SEO-Schema"
+            "PATH04-BR11_Encyclopedic-NPOV"
+            "PATH04-BR12_Telemetry-Output"
+          )
+          missing=0
+          for br in "${expected[@]}"; do
+            manifest="branches/${br}/branch.json"
+            if [[ ! -f "$manifest" ]]; then
+              echo "MISSING: $manifest"
+              missing=$((missing + 1))
+            else
+              python3 -m json.tool "$manifest" > /dev/null
+              echo "OK: $manifest"
+            fi
+          done
+          if [[ "$missing" -gt 0 ]]; then
+            echo "Verification failed: $missing branch manifests missing."
+            exit 1
+          fi
+          echo "### WikiLife Core CI" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Verified all **12/12** branches and JSON manifests successfully." >> "$GITHUB_STEP_SUMMARY"

@@ -48,3 +48,5 @@ Force-FixTAInputACL.ps1
 # Exclude large binary Rocket League replay files while keeping Yusra markdown analytics tracked
 data/replays_vault/*.replay
 !docs/match_analytics/*.md
+
+node_modules/
